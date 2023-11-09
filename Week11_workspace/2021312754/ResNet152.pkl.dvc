@@ -1,0 +1,5 @@
+outs:
+- md5: 691f1d0d552d6a5cc4fe0957a015ab96
+  size: 241671866
+  hash: md5
+  path: ResNet152.pkl
