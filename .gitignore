@@ -1,5 +1,7 @@
 data/**/*.jpg
+data/**/*.zip
 **/.DS_STORE
+experiments/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
