@@ -61,7 +61,6 @@ class Generator(nn.Module):
         w: torch.Tensor,
         noise=None,
     ):
-        print(w.shape)
         batch_size = w.shape[0]
 
         if noise is None:
