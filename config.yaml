@@ -10,7 +10,7 @@ train_dataloader:
     masked_image_dir: './data/processed/masked_image'
     identity_image_dir: './data/processed/identity_image'
     unmasked_image_dir: './data/processed/unmasked_image'
-    batch_size: 2
+    batch_size: 16
     shuffle: True,
     num_workers: 2
 
@@ -25,33 +25,46 @@ validation_dataloader:
     num_workers: 2
 
 model:
-  name: MaskRemover 
-  args:
-    output_resolution: 512
-    latent_dim: 512
+  generator:
+    name: MaskRemover 
+    args:
+      output_resolution: 512
+      latent_dim: 512
+  discriminator:
+    name: Discriminator
 
 loss:
   name: MaskRemoverLoss
   args:
-    lambda_content: 0.1
-    lambda_perceptual: 0.5
-    lambda_identity: 0.4
+    lambda_content: 1.0
+    lambda_perceptual: 0.8
+    lambda_identity: 0.1
+    lambda_adversarial: 0.5
 
 optimizer:
-  name: Adam
-  args:
-    lr: 0.004
+  optim_g:
+    name: Adam
+    args:
+      lr: !!float 3e-4
+      eps: !!float 1e-8
+      betas: [0.9, 0.99]
+
+  optim_d:
+    name: Adam
+    args:
+      lr: !!float 3e-4
+      eps: !!float 1e-8
+      betas: [0.9, 0.99]
 
 lr_scheduler:
-  name: "CosineAnnealingWarmRestarts"
+  name: MultiStepLR
   args:
-    T_0: 25
-    T_mult: 1
-    eta_min: 0.00005
+    milestones: [80000, 120000, 160000, 200000]
+    gamma: 0.5
 
 trainer:
   num_epochs: 100
-  log_step: 100
+  log_step: 5
 
   checkpoint_dir: "experiments/"
   save_period: 1

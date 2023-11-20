@@ -23,11 +23,20 @@ class ConfigParser:
         self.data[key] = value
 
     def build(self, object_type: str, module, *args, **kwargs):
-        module_name = self.data[object_type].get("name", None)
+        submodule = kwargs.get("submodule", None)
+        if submodule is not None:
+            kwargs.pop("submodule")
+            module_name = self.data[object_type][submodule].get("name", None)
+        else:
+            module_name = self.data[object_type].get("name", None)
+
         if module_name is None:
             return None
 
-        module_args = self.data[object_type].get("args", None)
+        if submodule is not None:
+            module_args = self.data[object_type][submodule].get("args", None)
+        else:
+            module_args = self.data[object_type].get("args", None)
         if module_args is None:
             return getattr(module, module_name)(*args, **kwargs)
 
