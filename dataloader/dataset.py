@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple
 
 import cv2
 import torch
@@ -14,7 +14,6 @@ class MaskPairImageDataset(Dataset):
         masked_image_dir: str,
         identity_image_dir: str,
         unmasked_image_dir: str,
-        transforms: Union[transforms.Compose, None],
     ) -> None:
         """Dataset for image pairs with masked and unmasked face.
 
@@ -55,13 +54,20 @@ class MaskPairImageDataset(Dataset):
         self.masked_image_dir = masked_image_dir
         self.identity_image_dir = identity_image_dir
         self.unmasked_image_dir = unmasked_image_dir
-        self.transforms = transforms
 
         self.masked_image_list = os.listdir(masked_image_dir)
         self.identity_image_list = {
             identity: os.listdir(os.path.join(identity_image_dir, identity))
             for identity in os.listdir(identity_image_dir)
         }
+
+        self.transform = transforms.Compose(
+            [
+                transforms.Normalize(
+                    mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+                ),
+            ]
+        )
 
     def __getitem__(self, idx: int) -> Dict:
         label = self.masked_image_list[idx]
@@ -83,15 +89,17 @@ class MaskPairImageDataset(Dataset):
         unmasked_image = cv2.cvtColor(unmasked_image, cv2.COLOR_BGR2RGB)
         identity_image = cv2.cvtColor(identity_image, cv2.COLOR_BGR2RGB)
 
-        masked_image = torch.permute(torch.from_numpy(masked_image), (2, 0, 1))
-        unmasked_image = torch.permute(torch.from_numpy(unmasked_image), (2, 0, 1))
-        identity_image = torch.permute(torch.from_numpy(identity_image), (2, 0, 1))
+        masked_image = torch.permute(torch.from_numpy(masked_image), (2, 0, 1)).float()
+        unmasked_image = torch.permute(
+            torch.from_numpy(unmasked_image), (2, 0, 1)
+        ).float()
+        identity_image = torch.permute(
+            torch.from_numpy(identity_image), (2, 0, 1)
+        ).float()
 
-        if self.transforms is not None:
-            identity_image = self.transforms(identity_image)
-            masked_image, identity_image = self.paired_transform(
-                masked_image, identity_image
-            )
+        masked_image = self.transform(masked_image)
+        unmasked_image = self.transform(unmasked_image)
+        identity_image = self.transform(identity_image)
 
         return {
             "masked_image": identity_image,

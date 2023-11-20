@@ -16,7 +16,7 @@ class MaskPairImageDataLoader(DataLoader):
         num_workers: int = 2,
     ) -> None:
         self.dataset = MaskPairImageDataset(
-            masked_image_dir, identity_image_dir, unmasked_image_dir, transforms=None
+            masked_image_dir, identity_image_dir, unmasked_image_dir
         )
         self.dataset_length = len(self.dataset)
         self.batch_size = batch_size
