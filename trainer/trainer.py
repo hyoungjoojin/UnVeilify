@@ -1,6 +1,6 @@
 import torch
 import torch.backends.mps as mps
-from tqdm import tqdm
+import torch.nn.functional as F
 
 # device = torch.device(
 #     "cuda" if torch.cuda.is_available() else "mps" if mps.is_available() else "cpu"
@@ -13,9 +13,11 @@ class Trainer:
         self,
         train_dataloader,
         validation_dataloader,
-        model,
+        model_g,
+        model_d,
         loss_function,
-        optimizer,
+        optimizer_g,
+        optimizer_d,
         lr_scheduler,
         train_config,
         logger,
@@ -23,9 +25,15 @@ class Trainer:
         self.train_dataloader = train_dataloader
         self.validation_dataloader = validation_dataloader
 
-        self.model = model.to(device)
-        self.loss_function = loss_function
-        self.optimizer = optimizer
+        self.generator = model_g.to(device)
+        self.discriminator = model_d.to(device)
+        self.loss_function = loss_function.to(device)
+
+        # TODO: Clean this up somewhere else
+        self.gan_loss_function = F.binary_cross_entropy
+
+        self.optimizer_g = optimizer_g
+        self.optimizer_d = optimizer_d
         self.lr_scheduler = lr_scheduler
 
         self.train_config = train_config
@@ -41,7 +49,7 @@ class Trainer:
         self.logger = logger
 
     def train(self):
-        self.model.train()
+        self.generator.train()
 
         for epoch in range(self.start_epoch, self.num_epochs + 1):
             self._train_one_epoch(epoch)
@@ -52,24 +60,34 @@ class Trainer:
     def _train_one_epoch(self, epoch: int):
         self.logger.info(f"Start training epoch {epoch}...")
         for batch_idx, item in enumerate(self.train_dataloader):
-            masked_image = item["masked_image"].to(self.device).float()
-            unmasked_image = item["unmasked_image"].to(self.device).float()
-            identity_image = item["identity_image"].to(self.device).float()
+            masked_image = item["masked_image"].to(self.device)
+            unmasked_image = item["unmasked_image"].to(self.device)
+            identity_image = item["identity_image"].to(self.device)
 
-            generated_unmasked_image = self.model(masked_image, identity_image)
-            print(generated_unmasked_image.shape)
+            generated_unmasked_image = self.generator(masked_image, identity_image)
 
-            loss = self.loss_function(unmasked_image, generated_unmasked_image)
-            print("loss", loss)
+            loss, loss_dict = self.loss_function(
+                unmasked_image,
+                generated_unmasked_image,
+                identity_image,
+                self.discriminator,
+                self.optimizer_d,
+            )
 
-            self.optimizer.zero_grad()
+            self.optimizer_g.zero_grad()
             loss.backward()
-            self.optimizer.step()
+            self.optimizer_g.step()
 
             if batch_idx % self.log_step == 0:
                 self.logger.info(
-                    f"EPOCH {epoch} BATCH {batch_idx}: loss={loss.item():.3f}"
+                    f"EPOCH {epoch} BATCH {batch_idx}: "
+                    + f"total_loss={loss.item():.3f} "
+                    + f"content_loss={loss_dict['content']:.3f} "
+                    + f"perceptual_loss={loss_dict['perceptual']:.3f} "
+                    + f"identity_loss={loss_dict['identity']:.3f} "
+                    + f"generator_loss={loss_dict['adversarial']:.3f}"
                 )
+
         self.lr_scheduler.step()
 
     def _save_checkpoint(self, epoch: int, is_best: bool = False) -> None:
@@ -85,14 +103,14 @@ class Trainer:
         """
         state = {
             "epoch": epoch,
-            "model_state_dict": self.model.state_dict(),
-            "optim_state_dict": self.optimizer.state_dict(),
+            "generator_state_dict": self.generator.state_dict(),
+            "discriminator_state_dict": self.discriminator.state_dict(),
+            "optim_g_state_dict": self.optimizer_g.state_dict(),
+            "optim_d_state_dict": self.optimizer_d.state_dict(),
             "config": self.train_config,
         }
 
-        filename = (
-            f"{self.checkpoint_dir}/{self.model.__class__.__name__}-epoch{epoch}.pth"
-        )
+        filename = f"{self.checkpoint_dir}/{self.generator.__class__.__name__}-epoch{epoch}.pth"
         torch.save(state, filename)
         self.logger.info(f"Saved checkpoint to: {filename}")
 
@@ -114,4 +132,5 @@ class Trainer:
                 "Architecture configuration given in config file is different from that of "
                 "checkpoint. This may yield an exception while state_dict is being loaded."
             )
-        self.model.load_state_dict(checkpoint["state_dict"])
+        self.generator.load_state_dict(checkpoint["generator_state_dict"])
+        self.discriminator.load_state_dict(checkpoint["discriminator_state_dict"])

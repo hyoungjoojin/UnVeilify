@@ -24,19 +24,32 @@ def main(config):
 
     logger.info(f"Dataloader build success.")
 
-    model = config.build("model", packages["model_module"])
-    logger.info(f"Model build success.\n{model}")
+    generator = config.build("model", packages["model_module"], submodule="generator")
+    discriminator = config.build(
+        "model", packages["model_module"], submodule="discriminator"
+    )
+    logger.info(f"Model build success.\n{generator}\n{discriminator}")
 
     loss_function = config.build("loss", packages["loss_module"])
     logger.info("Loss build success.")
 
-    optimizer = config.build(
-        "optimizer", packages["optimizer_module"], model.parameters()
+    optimizer_g = config.build(
+        "optimizer",
+        packages["optimizer_module"],
+        generator.parameters(),
+        submodule="optim_g",
     )
+    optimizer_d = config.build(
+        "optimizer",
+        packages["optimizer_module"],
+        discriminator.parameters(),
+        submodule="optim_d",
+    )
+
     logger.info("Optimizer build success.")
 
     lr_scheduler = config.build(
-        "lr_scheduler", packages["lr_scheduler_module"], optimizer
+        "lr_scheduler", packages["lr_scheduler_module"], optimizer_g
     )
     if lr_scheduler is not None:
         logger.info("LR scheduler build success.")
@@ -46,9 +59,11 @@ def main(config):
     trainer = Trainer(
         train_dataloader,
         validation_dataloader,
-        model,
+        generator,
+        discriminator,
         loss_function,
-        optimizer,
+        optimizer_g,
+        optimizer_d,
         lr_scheduler,
         config["trainer"],
         logger,
