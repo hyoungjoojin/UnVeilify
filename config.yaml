@@ -10,7 +10,7 @@ train_dataloader:
     masked_image_dir: './data/processed/masked_image'
     identity_image_dir: './data/processed/identity_image'
     unmasked_image_dir: './data/processed/unmasked_image'
-    batch_size: 16
+    batch_size: 4
     shuffle: True,
     num_workers: 2
 
@@ -37,9 +37,9 @@ loss:
   name: MaskRemoverLoss
   args:
     lambda_content: 1.0
-    lambda_perceptual: 0.8
-    lambda_identity: 0.1
-    lambda_adversarial: 0.5
+    lambda_perceptual: 1.0
+    lambda_identity: 0.5
+    lambda_adversarial: 1.0
 
 optimizer:
   optim_g:
@@ -59,7 +59,7 @@ optimizer:
 lr_scheduler:
   name: MultiStepLR
   args:
-    milestones: [80000, 120000, 160000, 200000]
+    milestones: [2500, 5000, 10000, 20000]
     gamma: 0.5
 
 trainer:
