@@ -9,7 +9,7 @@ from facenet_pytorch import InceptionResnetV1
 __all__ = ["MaskRemoverLoss"]
 
 
-def mse_loss(pred, target, normalize: bool = True):
+def mse_loss(pred, target, normalize: bool = False):
     if normalize:
         pred = F.normalize(pred)
         target = F.normalize(target)
@@ -99,4 +99,4 @@ class IdentityLoss(nn.Module):
     ) -> torch.Tensor:
         gt_feats = self.extract_feats(ground_truth)
         pred_feats = self.extract_feats(generated_image)
-        return mse_loss(gt_feats, pred_feats, normalize=False)
+        return mse_loss(gt_feats, pred_feats)
