@@ -98,10 +98,6 @@ class MaskPairImageDataset(Dataset):
         unmasked_image = cv2.cvtColor(unmasked_image, cv2.COLOR_BGR2RGB)
         identity_image = cv2.cvtColor(identity_image, cv2.COLOR_BGR2RGB)
 
-        masked_image, unmasked_image = self.paired_augmentation(
-            masked_image, unmasked_image
-        )
-
         masked_image = torch.permute(torch.from_numpy(masked_image), (2, 0, 1)).float()
         unmasked_image = torch.permute(
             torch.from_numpy(unmasked_image), (2, 0, 1)
@@ -115,9 +111,9 @@ class MaskPairImageDataset(Dataset):
         identity_image = self.transform(identity_image)
 
         return {
-            "masked_image": identity_image,
-            "identity_image": unmasked_image,
-            "unmasked_image": identity_image,
+            "masked_image": masked_image,
+            "identity_image": identity_image,
+            "unmasked_image": unmasked_image,
         }
 
     def __len__(self) -> int:
