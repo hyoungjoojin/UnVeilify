@@ -14,9 +14,13 @@ class MaskPairImageDataLoader(DataLoader):
         batch_size: int,
         shuffle: bool = True,
         num_workers: int = 2,
+        image_resolution: int = 512,
     ) -> None:
         self.dataset = MaskPairImageDataset(
-            masked_image_dir, identity_image_dir, unmasked_image_dir
+            masked_image_dir,
+            identity_image_dir,
+            unmasked_image_dir,
+            image_resolution=image_resolution,
         )
         self.dataset_length = len(self.dataset)
         self.batch_size = batch_size
