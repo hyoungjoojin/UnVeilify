@@ -26,7 +26,32 @@ class Generator(nn.Module):
         self.n_blocks = len(features)
 
         # Trainable $4 \times 4$ constant
-        self.initial_constant = nn.Parameter(torch.randn((1, features[0], 4, 4)))
+
+        # In case of CUDA OOM
+        self.downsample = nn.Sequential(
+            nn.Conv2d(in_channels=3, out_channels=512, kernel_size=1),
+            nn.ReLU(),
+            *[nn.MaxPool2d(kernel_size=2) for _ in range(log_resolution - 2)]
+        )
+
+        # Maybe initial constant doesn't know where to start
+        self.downsample = nn.Sequential(
+            *[
+                nn.Sequential(
+                    nn.Conv2d(
+                        in_channels=3 if i == 0 else 2 ** (i + 2),
+                        out_channels=2 ** (i + 3),
+                        kernel_size=3,
+                        padding=1,
+                    ),
+                    nn.BatchNorm2d(num_features=2 ** (i + 3)),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(kernel_size=2),
+                )
+                for i in range(log_resolution - 2)
+            ]
+        )
+        # self.initial_constant = nn.Parameter(torch.randn((1, features[0], 4, 4)))
 
         # First style block for $4 \times 4$ resolution and layer to get RGB
         self.style_block = StyleBlock(d_latent, features[0], features[0])
@@ -58,6 +83,7 @@ class Generator(nn.Module):
 
     def forward(
         self,
+        masked_image: torch.Tensor,
         w: torch.Tensor,
         noise=None,
     ):
@@ -67,7 +93,8 @@ class Generator(nn.Module):
             noise = self.get_noise(batch_size, device=w.device)
 
         w = torch.swapaxes(w, 0, 1)
-        x = self.initial_constant.expand(batch_size, -1, -1, -1)
+        # x = self.initial_constant.expand(batch_size, -1, -1, -1)
+        x = self.downsample(masked_image)
 
         # The first style block
         x = self.style_block(x, w[0], noise[0][1])

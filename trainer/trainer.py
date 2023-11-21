@@ -46,6 +46,8 @@ class Trainer:
         self.log_step = train_config["log_step"]
         self.checkpoint_dir = os.path.join(train_config["checkpoint_dir"], project_name)
         self.save_period = train_config["save_period"]
+
+        self.use_tensorboard = train_config["use_tensorboard"]
         self.visualization = train_config["visualization"]
 
         self.device = device
@@ -89,13 +91,16 @@ class Trainer:
         os.mkdir(os.path.join(self.checkpoint_dir, "checkpoints"))
 
     def train(self):
-        self.generator.train()
-        self.discriminator.train()
-
         for epoch in range(self.start_epoch, self.num_epochs + 1):
+            self.generator.train()
+            self.discriminator.train()
+
             self.train_one_epoch(epoch)
 
             if (epoch + 1) % self.save_period == 0:
+                self.generator.eval()
+                self.discriminator.eval()
+
                 self.save_checkpoint(epoch)
 
                 if self.visualization:
@@ -154,9 +159,11 @@ class Trainer:
             "config": self.train_config,
         }
 
-        filename = f"{self.checkpoint_dir}/{self.generator.__class__.__name__}-epoch{epoch}.pth"
-        torch.save(state, filename)
-        self.logger.info(f"Saved checkpoint to: {filename}")
+        checkpoint_path = os.path.join(
+            self.checkpoint_dir, "checkpoints", f"{self.project_name}-epoch{epoch}.pth"
+        )
+        torch.save(state, checkpoint_path)
+        self.logger.info(f"Saved checkpoint to: {checkpoint_path}")
 
         if is_best:
             best_path = str(self.checkpoint_dir / "checkpoint_best.pth")
