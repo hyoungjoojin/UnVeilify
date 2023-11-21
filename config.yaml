@@ -1,4 +1,6 @@
 name: NoMask
+deterministic: True
+seed: 10
 
 logger:
   path: "logs"
@@ -20,7 +22,7 @@ validation_dataloader:
     masked_image_dir: './data/processed/masked_image'
     identity_image_dir: './data/processed/identity_image'
     unmasked_image_dir: './data/processed/unmasked_image'
-    batch_size: 2 
+    batch_size: 4 
     shuffle: True,
     num_workers: 2
 
@@ -37,7 +39,7 @@ loss:
   name: MaskRemoverLoss
   args:
     lambda_content: 1.0
-    lambda_perceptual: 1.0
+    lambda_perceptual: 5.0
     lambda_identity: 0.5
     lambda_adversarial: 1.0
 
@@ -73,6 +75,7 @@ trainer:
   early_stop: 10
 
   use_tensorboard: True
+  visualization: True
 
   validation:
     do_validation: True
