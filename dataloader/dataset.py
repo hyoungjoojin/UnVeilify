@@ -3,6 +3,7 @@ import random
 from typing import Dict, Tuple
 
 import cv2
+import numpy as np
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
@@ -61,6 +62,14 @@ class MaskPairImageDataset(Dataset):
             for identity in os.listdir(identity_image_dir)
         }
 
+        self.augmentation = transforms.Compose(
+            [
+                transforms.RandomVerticalFlip(),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomRotation(degrees=90),
+            ]
+        )
+
         self.transform = transforms.Compose(
             [
                 transforms.Normalize(
@@ -89,6 +98,10 @@ class MaskPairImageDataset(Dataset):
         unmasked_image = cv2.cvtColor(unmasked_image, cv2.COLOR_BGR2RGB)
         identity_image = cv2.cvtColor(identity_image, cv2.COLOR_BGR2RGB)
 
+        masked_image, unmasked_image = self.paired_augmentation(
+            masked_image, unmasked_image
+        )
+
         masked_image = torch.permute(torch.from_numpy(masked_image), (2, 0, 1)).float()
         unmasked_image = torch.permute(
             torch.from_numpy(unmasked_image), (2, 0, 1)
@@ -110,9 +123,19 @@ class MaskPairImageDataset(Dataset):
     def __len__(self) -> int:
         return len(self.masked_image_list)
 
-    def paired_transform(
-        self, img1: torch.Tensor, img2: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def paired_augmentation(
+        self, img1: np.ndarray, img2: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Transform for paired images"""
-        # TODO
+        if random.random() < 0.5:
+            img1 = np.flip(img1, 0)
+            img2 = np.flip(img2, 0)
+
+        if random.random() < 0.5:
+            img1 = np.flip(img1, 1)
+            img2 = np.flip(img2, 1)
+
+        rot_k = random.choice([0, 1, 2, 3])
+        img1 = np.rot90(img1, k=rot_k, axes=(0, 1))
+        img2 = np.rot90(img2, k=rot_k, axes=(0, 1))
         return img1, img2
