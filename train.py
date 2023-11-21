@@ -13,7 +13,11 @@ packages = {
 
 
 def main(config):
-    utils.set_seed(config["seed"])
+    project_name = config["name"]
+
+    if config["deterministic"]:
+        utils.set_seed(config["seed"])
+
     logger = config.get_logger("train")
 
     train_dataloader = config.build("train_dataloader", packages["dataloader_module"])
@@ -54,9 +58,8 @@ def main(config):
     if lr_scheduler is not None:
         logger.info("LR scheduler build success.")
 
-    logger.info("Start training...")
-
     trainer = Trainer(
+        project_name,
         train_dataloader,
         validation_dataloader,
         generator,
@@ -70,8 +73,8 @@ def main(config):
     )
     logger.info("Trainer build success.")
 
+    logger.info("Start training. Good luck !!")
     trainer.train()
-    logger.info("Start training...")
 
 
 if __name__ == "__main__":
