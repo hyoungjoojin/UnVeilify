@@ -46,9 +46,10 @@ class ConfigParser:
         verbosity = self.data["logger"]["verbosity"]
         logger = logging.getLogger(name)
         logger.setLevel(verbosity)
+
         logging.basicConfig(
-            format="[%(levelname)s] From %(filename)s:%(funcName)s at %(asctime)s:%(msecs)03d\n>>> %(message)s",
-            datefmt="%H:%M:%S",
+            format=f"%(asctime)s[{self.data['name']}] %(message)s",
+            datefmt="[%Y/%m/%d %H:%M:%S]",
         )
 
         return logger
