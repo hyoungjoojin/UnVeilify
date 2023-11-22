@@ -2,9 +2,7 @@ import os
 import random
 from typing import Dict, Tuple
 
-import cv2
 import numpy as np
-import torch
 import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import Dataset
@@ -79,7 +77,7 @@ class MaskPairImageDataset(Dataset):
                 transforms.Normalize(
                     mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
                 ),
-                transforms.Resize((256, 256)),
+                transforms.Resize((image_resolution, image_resolution)),
             ]
         )
 

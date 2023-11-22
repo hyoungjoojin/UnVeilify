@@ -8,7 +8,12 @@ from .utils import bottleneck_IR, bottleneck_IR_SE, get_blocks
 
 class PSPEncoder(nn.Module):
     def __init__(
-        self, in_channels: int = 3, num_layers: int = 50, mode="ir", n_styles: int = 16
+        self,
+        in_channels: int = 3,
+        num_layers: int = 50,
+        mode="ir",
+        n_styles: int = 16,
+        input_resolution: int = 512,
     ):
         super(PSPEncoder, self).__init__()
         assert num_layers in [50, 100, 152], "num_layers should be 50,100, or 152"
@@ -43,14 +48,16 @@ class PSPEncoder(nn.Module):
         self.middle_ind = 7
         for i in range(self.style_count):
             if i < self.coarse_ind:
-                style = GradualStyleBlock(512, 512, 16)
+                style = GradualStyleBlock(512, 512, input_resolution // 2**5)
             elif i < self.middle_ind:
-                style = GradualStyleBlock(512, 512, 32)
+                style = GradualStyleBlock(512, 512, input_resolution // 2**4)
             else:
-                style = GradualStyleBlock(512, 512, 64)
+                style = GradualStyleBlock(512, 512, input_resolution // 2**3)
             self.styles.append(style)
         self.latlayer1 = nn.Conv2d(256, 512, kernel_size=1, stride=1, padding=0)
         self.latlayer2 = nn.Conv2d(128, 512, kernel_size=1, stride=1, padding=0)
+
+        self.initialize_network()
 
     def _upsample_add(self, x, y):
         """Upsample and add two feature maps.
@@ -73,11 +80,13 @@ class PSPEncoder(nn.Module):
 
     def forward(self, x):
         x = self.input_layer(x)
+        print(x.shape)
 
         latents = []
         modulelist = list(self.body._modules.values())
         for i, l in enumerate(modulelist):
             x = l(x)
+            print(x.shape)
             if i == 6:
                 c1 = x
             elif i == 20:
@@ -99,6 +108,11 @@ class PSPEncoder(nn.Module):
         out = torch.stack(latents, dim=1)
         return out
 
+    def initialize_network(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight.data, 0.0)
+
 
 class GradualStyleBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, resolution: int):
@@ -113,9 +127,10 @@ class GradualStyleBlock(nn.Module):
                 ),
                 nn.LeakyReLU(),
             ]
+        modules.append(nn.MaxPool2d(kernel_size=2))
 
         self.convs = nn.Sequential(*modules)
-        self.linear = nn.Linear(in_features=out_channels * 4, out_features=out_channels)
+        self.linear = nn.Linear(in_features=out_channels, out_features=out_channels)
 
     def forward(self, x):
         batch_size = x.shape[0]
