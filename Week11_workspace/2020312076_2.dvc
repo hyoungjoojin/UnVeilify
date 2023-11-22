@@ -1,5 +1,0 @@
-outs:
-- md5: 3c076edbe7e293f91d8c2545f4759ad0
-  size: 188331087
-  hash: md5
-  path: train_point_clouds.h5
