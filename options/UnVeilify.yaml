@@ -1,4 +1,4 @@
-name: NoMask
+name: UnVeilify
 deterministic: True
 seed: 10
 
@@ -9,35 +9,39 @@ logger:
 train_dataloader:
   name: MaskPairImageDataLoader
   args:
-    masked_image_dir: './data/processed/masked_image'
-    identity_image_dir: './data/processed/identity_image'
-    unmasked_image_dir: './data/processed/unmasked_image'
-    batch_size: 4
+    masked_image_dir: './data/processed/masked_image/train'
+    identity_image_dir: './data/processed/identity_image/train'
+    unmasked_image_dir: './data/processed/unmasked_image/train'
+    batch_size: 2
     shuffle: True,
     num_workers: 2
+    image_resolution: 256
 
 validation_dataloader:
   name: MaskPairImageDataLoader
   args:
-    masked_image_dir: './data/processed/masked_image'
-    identity_image_dir: './data/processed/identity_image'
-    unmasked_image_dir: './data/processed/unmasked_image'
-    batch_size: 4 
+    masked_image_dir: './data/processed/masked_image/val'
+    identity_image_dir: './data/processed/identity_image/val'
+    unmasked_image_dir: './data/processed/unmasked_image/val'
+    batch_size: 2 
     shuffle: True,
     num_workers: 2
+    image_resolution: 256
 
 model:
   generator:
     name: MaskRemover 
     args:
-      output_resolution: 512
+      output_resolution: 256
       latent_dim: 512
+      generator_arch: UNetStyleGAN
   discriminator:
     name: Discriminator
 
 loss:
   name: MaskRemoverLoss
   args:
+    pretrained_irse50: './pretrain/irse_50.pth'
     lambda_content: 1.0
     lambda_perceptual: 5.0
     lambda_identity: 0.5
