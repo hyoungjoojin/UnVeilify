@@ -4,7 +4,8 @@ from typing import Union
 import torch
 import torch.backends.mps as mps
 import torchvision.transforms as transforms
-from torchvision.transforms.functional import invert, to_pil_image
+from torch.utils.tensorboard.writer import SummaryWriter
+from torchvision.transforms.functional import to_pil_image
 
 device = torch.device(
     "cuda" if torch.cuda.is_available() else "mps" if mps.is_available() else "cpu"
@@ -47,7 +48,6 @@ class Trainer:
         self.checkpoint_dir = os.path.join(train_config["checkpoint_dir"], project_name)
         self.save_period = train_config["save_period"]
 
-        self.use_tensorboard = train_config["use_tensorboard"]
         self.visualization = train_config["visualization"]
 
         self.device = device
@@ -65,6 +65,12 @@ class Trainer:
         )
 
         self.setup_directory()
+        if train_config["use_tensorboard"]:
+            self.writer = SummaryWriter(
+                log_dir=os.path.join(self.checkpoint_dir, "logs")
+            )
+        else:
+            self.writer = None
 
     def setup_directory(self):
         if os.path.exists(self.checkpoint_dir):
@@ -137,6 +143,9 @@ class Trainer:
                     + f"generator_loss={loss_dict['adversarial']:.3f}"
                 )
 
+                if self.writer is not None:
+                    self.writer.add_scalar("loss/train", loss)
+
         self.lr_scheduler.step()
 
     def save_checkpoint(self, epoch: int, is_best: bool = False) -> None:
@@ -197,8 +206,8 @@ class Trainer:
             unmasked_image = self.denormalize(unmasked_image)
             generated_output = self.denormalize(generated_output)
 
-            image_to_save = invert(
-                torch.cat([masked_image, unmasked_image, generated_output], dim=2)
+            image_to_save = torch.cat(
+                [masked_image, unmasked_image, generated_output], dim=2
             )
             image_to_save = to_pil_image(
                 image_to_save,
