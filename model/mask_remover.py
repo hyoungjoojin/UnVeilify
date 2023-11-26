@@ -4,7 +4,6 @@ import torch
 from torch import nn
 
 from .generator import UNetStyleGAN
-from .identity_extractor import IdentityExtractor
 from .psp_encoder import PSPEncoder
 
 
@@ -31,10 +30,6 @@ class MaskRemover(nn.Module):
             input_resolution=output_resolution,
         )
 
-        self.identity_extractor = IdentityExtractor(
-            n_styles=self.n_styles, latent_dim=latent_dim
-        )
-
         if generator_arch == "UNetStyleGAN":
             self.generator = UNetStyleGAN(self.output_resolution, 3, latent_dim)
         else:
@@ -50,14 +45,8 @@ class MaskRemover(nn.Module):
         masked_image: torch.Tensor,
         identity_image: torch.Tensor,
     ):
-        masked_image_features = self.psp_encoder(masked_image)
-        identity_featues = self.identity_extractor(identity_image)
-
-        latent_features = torch.add(masked_image_features, identity_featues)
-        latent_features = (
-            masked_image_features * self.alpha + identity_featues + (1 - self.alpha)
-        )
-        image = self.generator(masked_image, w=latent_features)
+        identity_featues = self.psp_encoder(identity_image)
+        image = self.generator(masked_image, w=identity_featues)
         return image
 
     def initialize_network(self):
