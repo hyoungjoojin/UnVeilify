@@ -7,13 +7,14 @@ from models.loss import GANLoss, MultiscaleL1Loss, MaskedL1Loss, center_loss
 import models.networks as networks
 from collections import OrderedDict
 
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print(f'사용 디바이스: {device}')
 
 class InpaintingModel(BaseModel):
     def __init__(self, opt):
         super(InpaintingModel, self).__init__(opt)
         train_opt = opt['train']
 
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print(f'사용 디바이스: {device}')
 
         # define networks and load pretrained model
