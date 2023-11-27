@@ -10,11 +10,11 @@ from .utils import bottleneck_IR, bottleneck_IR_SE, get_blocks, l2_norm
 __all__ = ["MaskRemoverLoss"]
 
 
-def mse_loss(pred, target, normalize: bool = False):
+def l1_loss(pred, target, normalize: bool = False):
     if normalize:
         pred = F.normalize(pred)
         target = F.normalize(target)
-    return F.mse_loss(pred, target, reduction="sum")
+    return F.l1_loss(pred, target, reduction="mean")
 
 
 class MaskRemoverLoss(nn.Module):
@@ -58,7 +58,7 @@ class MaskRemoverLoss(nn.Module):
         output_fake = discriminator(generated_image, identity_image).view(-1)
         adverarial_loss = self.gan_loss(output_fake, torch.ones_like(output_fake))
 
-        content_loss = mse_loss(ground_truth, generated_image)
+        content_loss = l1_loss(ground_truth, generated_image)
         identity_loss = self.identity_loss(ground_truth, generated_image)
         perceptual_loss = self.perceptual_loss(ground_truth, generated_image).sum()
 
