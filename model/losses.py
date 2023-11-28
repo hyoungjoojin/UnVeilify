@@ -25,12 +25,14 @@ class MaskRemoverLoss(nn.Module):
         lambda_perceptual: float,
         lambda_identity: float,
         lambda_adversarial: float,
+        lambda_regularization: float,
     ) -> None:
         super(MaskRemoverLoss, self).__init__()
         self.lambda_content = lambda_content
         self.lambda_perceptual = lambda_perceptual
         self.lambda_identity = lambda_identity
         self.lambda_adversarial = lambda_adversarial
+        self.lambda_regularization = lambda_regularization
 
         self.perceptual_loss = lpips.LPIPS(net="vgg", spatial=False)
         self.identity_loss = IdentityLoss(pretrained_irse50)
@@ -41,6 +43,7 @@ class MaskRemoverLoss(nn.Module):
         ground_truth: torch.Tensor,
         generated_image: torch.Tensor,
         identity_image: torch.Tensor,
+        identity_features: torch.Tensor,
         discriminator: nn.Module,
         optim_d: torch.optim.Optimizer,
     ) -> Tuple[torch.Tensor, Dict]:
@@ -61,12 +64,17 @@ class MaskRemoverLoss(nn.Module):
         content_loss = l1_loss(ground_truth, generated_image)
         identity_loss = self.identity_loss(ground_truth, generated_image)
         perceptual_loss = self.perceptual_loss(ground_truth, generated_image).sum()
+        regualization_loss = (
+            torch.sum(identity_features.norm(2, dim=(1, 2)))
+            / identity_features.shape[0]
+        )
 
         loss = (
             self.lambda_content * content_loss
             + self.lambda_identity * identity_loss
             + self.lambda_perceptual * perceptual_loss
             + self.lambda_adversarial * adverarial_loss
+            + self.lambda_regularization * regualization_loss
         )
 
         return loss, {
@@ -74,6 +82,7 @@ class MaskRemoverLoss(nn.Module):
             "perceptual": perceptual_loss.item(),
             "identity": identity_loss.item(),
             "adversarial": adverarial_loss.item(),
+            "regularization": regualization_loss.item(),
         }
 
 
@@ -84,7 +93,7 @@ class IdentityLoss(nn.Module):
         self.facenet = Backbone(
             input_size=112, num_layers=50, drop_ratio=0.6, mode="ir_se"
         )
-        self.facenet.load_state_dict(torch.load(pretrained_irse50))
+        self.facenet.load_state_dict(torch.load(pretrained_irse50, map_location="mps"))
         self.face_pool = torch.nn.AdaptiveAvgPool2d((112, 112))
         self.facenet.eval()
 

@@ -47,7 +47,7 @@ class MaskRemover(nn.Module):
     ):
         identity_featues = self.psp_encoder(identity_image)
         image = self.generator(masked_image, w=identity_featues)
-        return image
+        return (identity_featues, image)
 
     def initialize_network(self):
         for m in self.generator.modules():
