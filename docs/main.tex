@@ -1,26 +1,21 @@
 \documentclass[sigconf]{acmart}
 
-%% Rights management information.  This information is sent to you
-%% when you complete the rights form.  These commands have SAMPLE
-%% values in them; it is your responsibility as an author to replace
-%% the commands and values with those provided to you when you
-%% complete the rights form.
-\setcopyright{acmcopyright}
-\copyrightyear{2018}
-\acmYear{2018}
-\acmDOI{XXXXXXX.XXXXXXX}
+% \setcopyright{acmcopyright}
+% \copyrightyear{2018}
+% \acmYear{2018}
+% \acmDOI{XXXXXXX.XXXXXXX}
 
 %% These commands are for a PROCEEDINGS abstract or paper.
-\acmConference[Conference acronym 'XX]{Make sure to enter the correct
-  conference title from your rights confirmation emai}{June 03--05,
-  2018}{Woodstock, NY}
+% \acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%   conference title from your rights confirmation emai}{June 03--05,
+%   2018}{Woodstock, NY}
 %%
 %%  Uncomment \acmBooktitle if the title of the proceedings is different
 %%  from ``Proceedings of ...''!
 %%
 %%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
 %%  June 03--05, 2018, Woodstock, NY}
-\acmISBN{978-1-4503-XXXX-X/18/06}
+% \acmISBN{978-1-4503-XXXX-X/18/06}
 
 
 %%
@@ -115,7 +110,8 @@
 %%
 %% Keywords. The author(s) should pick words that accurately describe
 %% the work being presented. Separate the keywords with commas.
-\keywords{}
+\keywords{Generative Adversarial Networks, Personalized Image Generation, Mask Removal, Facial Inpainting,
+Facial Reconstruction, Image-to-image Translation}
 %% A "teaser" image appears between the author and affiliation
 %% information and the body of the document, and typically spans the
 %% page.
@@ -128,6 +124,11 @@
 \section{Introduction}
 
 \section{Related Work}
+
+\paragraph{Image-to-image Translation} {
+    pix2pix
+}
+
 \paragraph{Generative Adversarial Networks}{
 GANs.
 }
@@ -146,19 +147,96 @@ user wishes to reconstruct. Here, the identity image isn't constrained to any
 conditions, \emph{i.e.} the identity image and masked image are expected to be
 independent in every way except for the identity of the person.
 
-We first describe the identity extraction process. We then show the full network architecture
-that implements the extracted identity features as well as the objective function used
-in training this model.
+We first describe the overall architecture that implements the extracted identity features as well as the objective function used in training this model. We then show the identity extraction process.
+
+
+\subsection{Overall Architecture}
+Figure 1 shows the overall architecture of the proposed network, named as \emph{UnVeilify}. The input
+masked image goes through an encoder-decoder network, where the decoder is the StyleGAN generator
+\cite{StyleGAN}. Although the architecture of this decoder is different in some ways from the
+original StyleGAN model, to reduce confusion we leave the name as it is. Further description of this
+updated generator architecture can be seen in the following sections.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/model-architecture.png}
+  \caption{TODO: The figure is wrong. Overall architecture of the UnVeilify model.}
+  \Description{Overall architecture of the UnVeilify model.}
+\end{figure}
+
 
 \subsection{Identity Extraction}
-We extract the identity information from the identity image using the PSP
-encoder \cite{PSP}.
+We use the identity information as the style latent vector that gets projected 
+into the StyleGAN generator. Therefore the style vector, denoted as $w$ should be
+either $w\in\mathbb{R}^{d}$ or $w\in\mathbb{R}^{L\times d}$. Here, $d$ denotes the
+dimension of the latent vector and $L$ denotes the number of layers in the StyleGAN
+generator. Due to the higher ability to represent information, we choose to use the
+latter, hence the identity image is projected upon the $\mathit{W}^{+}$ latent space.
 
-\subsection{Network Architecture}
-Base StyleGAN \cite{StyleGAN}
+While there are other possibilites of extracting the identity information, we have
+build and conducted experiments only on the following architecture. The encoder we use
+is the pixel2style2pixel encoder (pSp encoder) \cite{PSP}. While the details of this
+encoder will not be included in this report, the main essence of this encoder is to use
+a hierarchial feature pyramid network to extract information from multiple different resolutions
+of the image.
+
+Also, while the authors of \cite{PSP} utilized a pretrained StyleGAN generator, due to our
+novel network architecture where the original input image features are intact, there is no
+need for any pretrained networks. This can help with further expandability to other domains,
+especially where specialized datasets are difficult to obtain, since our network can train 
+within a end-to-end setting. 
 
 \subsection{Objective Function}
-L1, perceptual, gan ...
+Our models uses several loss functions to achieve the best quality possible. The final
+objective function follows the form similar to the objective functions of other image-to-image
+translation models.
+We first use the $L1$ reconstruction loss in order to generate less blurry images
+compared to that of using the $L2$ loss \cite{L1, Pix2Pix}. This loss is used as a
+guide for generation by penalizing the distance between the ground truth unmasked image and
+generated unmasked image.
+\[
+    L_{reconstruction}(\mathbf{y}, \mathbf{\hat{y}}) = \|\mathbf{y} - \mathbf{\hat{y}}\|_1
+\]
+
+We also use a perceptual loss in order to generate images with high visual qualities. We
+utilize the LPIPS loss \cite{LPIPS} in the same way as \cite{PSP} has done,
+since it has been shown that the LPIPS
+loss preserves image quality better than other perceptual losses \cite{LPIPS2}.
+\[
+    L_{perceptual}(\mathbf{y}, \mathbf{\hat{y}}) = \|F(\mathbf{y}) - F(\mathbf{\hat{y}})\|_2
+\]
+Here, $F$ is the feature extractor used for the perceptual loss calculation.
+
+This task focuses highly on identity preservation, where a large portion of the network
+architecture design process is shifted towards this specific goal. Hence, in the objective
+function we needed a method to also enforce identity preservation. This is achieved by
+introducing an identity loss. By taking the cosine similiarity between the features of
+a pretrained face recognition network (here we use ArcFace \cite{Arcface}), we can assume
+that if the network trains to reduce this loss then the identity information loss would be
+minimized.
+\[
+    L_{identity}(\mathbf{y}, \mathbf{\hat{y}}) = 1- C(R(\mathbf{y}) - R(\mathbf{\hat{y}}))
+\]
+Here, $R$ is the face recognition backbone model and $C$ is the cosine similiarity
+function.
+
+This model follows the form of a generative adversarial network, and incorporates a discriminator
+and GAN loss. We use the objective function of the original GAN without any modifications.
+However, since the identity image is given as a form of a conditional image, we give the
+identity image paired with the unmasked image to the discriminator.
+The discriminator is a simple PatchGAN \cite{PatchGAN} discriminator.
+\[
+    L_{GAN} (G, D) = \mathbb{E}_{y, c}\left[\log D(y, c)\right] + \mathbb{E}_{\hat{y}, c}\left[\log D(\hat{y}, c)\right]
+\]
+
+Finally, we use a regularization loss for the facial features in order to normalize
+the latent style vectors. This follows the idea of the trucation trick introduced in
+StyleGAN.
+\[
+    L_{reg}(\mathbf{x}) = \|E(\mathbf{x}) - \bar{\mathbf{w}}\|_2
+\]
+
+The total objective function is the combination of these 5 separate objective functions.
 
 \section{Experiments}
 
@@ -236,20 +314,6 @@ L1, perceptual, gan ...
 % ``\verb|lmodern|'' and ``\verb|ltimes|'' packages should not be used,
 % as they will override the built-in typeface families.
 
-% \section{Title Information}
-
-% The title of your work should use capital letters appropriately -
-% \url{https://capitalizemytitle.com/} has useful rules for
-% capitalization. Use the {\verb|title|} command to define the title of
-% your work. If your work has a subtitle, define it with the
-% {\verb|subtitle|} command.  Do not insert line breaks in your title.
-
-% If your title is lengthy, you must define a short version to be used
-% in the page headers, to prevent overlapping text. The \verb|title|
-% command has a ``short title'' parameter:
-% \begin{verbatim}
-%   \title[short title]{full title}
-% \end{verbatim}
 
 % \section{Rights Information}
 
@@ -419,44 +483,9 @@ L1, perceptual, gan ...
 % \end{equation}
 % just to demonstrate \LaTeX's able handling of numbering.
 
-% \section{Figures}
 
-% The ``\verb|figure|'' environment should be used for figures. One or
-% more images can be placed within a figure. If your figure contains
-% third-party material, you must clearly identify it as such, as shown
-% in the example below.
-% \begin{figure}[h]
-%   \centering
-%   \includegraphics[width=\linewidth]{sample-franklin}
-%   \caption{1907 Franklin Model D roadster. Photograph by Harris \&
-%     Ewing, Inc. [Public domain], via Wikimedia
-%     Commons. (\url{https://goo.gl/VLCRBB}).}
-%   \Description{A woman and a girl in white dresses sit in an open car.}
-% \end{figure}
 
-% Your figures should contain a caption which describes the figure to
-% the reader.
 
-% Figure captions are placed {\itshape below} the figure.
-
-% Every figure should also have a figure description unless it is purely
-% decorative. These descriptions convey what’s in the image to someone
-% who cannot see it. They are also used by search engine crawlers for
-% indexing images, and when images cannot be loaded.
-
-% A figure description must be unformatted plain text less than 2000
-% characters long (including spaces).  {\bfseries Figure descriptions
-%   should not repeat the figure caption – their purpose is to capture
-%   important information that is not already provided in the caption or
-%   the main text of the paper.} For figures that convey important and
-% complex new information, a short text description may not be
-% adequate. More complex alternative descriptions can be placed in an
-% appendix and referenced in a short figure description. For example,
-% provide a data table capturing the information in a bar chart, or a
-% structured list representing a graph.  For additional information
-% regarding how best to write figure descriptions and why doing this is
-% so important, please see
-% \url{https://www.acm.org/publications/taps/describing-figures/}.
 
 % \subsection{The ``Teaser Figure''}
 
@@ -509,29 +538,6 @@ L1, perceptual, gan ...
 % numbered. This document has two appendices, demonstrating the section
 % and subsection identification method.
 
-% \section{Multi-language papers}
-
-% Papers may be written in languages other than English or include
-% titles, subtitles, keywords and abstracts in different languages (as a
-% rule, a paper in a language other than English should include an
-% English title and an English abstract).  Use \verb|language=...| for
-% every language used in the paper.  The last language indicated is the
-% main language of the paper.  For example, a French paper with
-% additional titles and abstracts in English and German may start with
-% the following command
-% \begin{verbatim}
-% \documentclass[sigconf, language=english, language=german,
-%                language=french]{acmart}
-% \end{verbatim}
-
-% The title, subtitle, keywords and abstract will be typeset in the main
-% language of the paper.  The commands \verb|\translatedXXX|, \verb|XXX|
-% begin title, subtitle and keywords, can be used to set these elements
-% in the other languages.  The environment \verb|translatedabstract| is
-% used to set the translation of the abstract.  These commands and
-% environment have a mandatory first argument: the language of the
-% second argument.  See \verb|sample-sigconf-i13n.tex| file for examples
-% of their usage.
 
 % \section{SIGCHI Extended Abstracts}
 
@@ -555,12 +561,6 @@ L1, perceptual, gan ...
 % To Robert, for the bagels and explaining CMYK and color spaces.
 % \end{acks}
 
-% %%
-% %% The next two lines define the bibliography style to be used, and
-% %% the bibliography file.
-% \bibliographystyle{ACM-Reference-Format}
-% \bibliography{sample-base}
-
 
 % %%
 % %% If your work has an appendix, this is the place to put it.
@@ -569,5 +569,3 @@ L1, perceptual, gan ...
 
 \end{document}
 \endinput
-%%
-%% End of file `sample-sigconf.tex'.

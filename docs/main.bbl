@@ -1,0 +1,97 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{8}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Deng et~al\mbox{.}(2019)]%
+        {Arcface}
+\bibfield{author}{\bibinfo{person}{Jiankang Deng}, \bibinfo{person}{Jia Guo}, \bibinfo{person}{Niannan Xue}, {and} \bibinfo{person}{Stefanos Zafeiriou}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Arcface: Additive angular margin loss for deep face recognition}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}}. \bibinfo{pages}{4690--4699}.
+\newblock
+
+
+\bibitem[Guan et~al\mbox{.}(2020)]%
+        {LPIPS2}
+\bibfield{author}{\bibinfo{person}{Shanyan Guan}, \bibinfo{person}{Ying Tai}, \bibinfo{person}{Bingbing Ni}, \bibinfo{person}{Feida Zhu}, \bibinfo{person}{Feiyue Huang}, {and} \bibinfo{person}{Xiaokang Yang}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Collaborative learning for faster stylegan embedding}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2007.01758}} (\bibinfo{year}{2020}).
+\newblock
+
+
+\bibitem[Isola et~al\mbox{.}(2017)]%
+        {Pix2Pix}
+\bibfield{author}{\bibinfo{person}{Phillip Isola}, \bibinfo{person}{Jun-Yan Zhu}, \bibinfo{person}{Tinghui Zhou}, {and} \bibinfo{person}{Alexei~A Efros}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Image-to-image translation with conditional adversarial networks}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE conference on computer vision and pattern recognition}}. \bibinfo{pages}{1125--1134}.
+\newblock
+
+
+\bibitem[Karras et~al\mbox{.}(2019)]%
+        {StyleGAN}
+\bibfield{author}{\bibinfo{person}{Tero Karras}, \bibinfo{person}{Samuli Laine}, {and} \bibinfo{person}{Timo Aila}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{A style-based generator architecture for generative adversarial networks}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}}. \bibinfo{pages}{4401--4410}.
+\newblock
+
+
+\bibitem[Larsen et~al\mbox{.}(2016)]%
+        {L1}
+\bibfield{author}{\bibinfo{person}{Anders Boesen~Lindbo Larsen}, \bibinfo{person}{S{\o}ren~Kaae S{\o}nderby}, \bibinfo{person}{Hugo Larochelle}, {and} \bibinfo{person}{Ole Winther}.} \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{Autoencoding beyond pixels using a learned similarity metric}. In \bibinfo{booktitle}{\emph{International conference on machine learning}}. PMLR, \bibinfo{pages}{1558--1566}.
+\newblock
+
+
+\bibitem[Li and Wand(2016)]%
+        {PatchGAN}
+\bibfield{author}{\bibinfo{person}{Chuan Li} {and} \bibinfo{person}{Michael Wand}.} \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{Precomputed real-time texture synthesis with markovian generative adversarial networks}. In \bibinfo{booktitle}{\emph{Computer Vision--ECCV 2016: 14th European Conference, Amsterdam , The Netherlands, October 11-14, 2016, Proceedings, Part III 14}}. Springer, \bibinfo{pages}{702--716}.
+\newblock
+
+
+\bibitem[Richardson et~al\mbox{.}(2021)]%
+        {PSP}
+\bibfield{author}{\bibinfo{person}{Elad Richardson}, \bibinfo{person}{Yuval Alaluf}, \bibinfo{person}{Or Patashnik}, \bibinfo{person}{Yotam Nitzan}, \bibinfo{person}{Yaniv Azar}, \bibinfo{person}{Stav Shapiro}, {and} \bibinfo{person}{Daniel Cohen-Or}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Encoding in style: a stylegan encoder for image-to-image translation}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}}. \bibinfo{pages}{2287--2296}.
+\newblock
+
+
+\bibitem[Zhang et~al\mbox{.}(2018)]%
+        {LPIPS}
+\bibfield{author}{\bibinfo{person}{Richard Zhang}, \bibinfo{person}{Phillip Isola}, \bibinfo{person}{Alexei~A Efros}, \bibinfo{person}{Eli Shechtman}, {and} \bibinfo{person}{Oliver Wang}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{The unreasonable effectiveness of deep features as a perceptual metric}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE conference on computer vision and pattern recognition}}. \bibinfo{pages}{586--595}.
+\newblock
+
+
+\end{thebibliography}
