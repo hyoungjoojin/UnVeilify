@@ -6,11 +6,11 @@ datasets:
     n_workers: 16
     fineSize: 256
     img_shape: [3, 256, 256]  # [channel, height, width]
-    image_list: 'datasets/masked/unmasked_list.txt'
-    mask_list: 'datasets/masked/masked_list.txt'
+    image_list: 'datasets/masked/unmasked_train.txt'
+    mask_list: 'datasets/masked/masked_train.txt'
     # mask_list: 'datasets/mask/list_train.txt'
     mask_type: 'regular'
-    mask_pos: 'random'
+    mask_pos: 'bottom'
     mask_height: 128
     mask_width: 128
     vertical_margin: 0
@@ -24,12 +24,12 @@ datasets:
     n_workers: 1
     fineSize: 256
     img_shape: [3, 256, 256]  # [channel, height, width]
-    image_list: 'datasets/masked/unmasked_list.txt'
-    mask_list: 'datasets/masked/masked_list.txt'
+    image_list: 'datasets/masked/unmasked_val.txt'
+    mask_list: 'datasets/masked/masked_val.txt'
     # image_list: 'datasets/celeba_hq/list_val.txt'
     # mask_list: 'datasets/mask/list_val.txt'
     mask_type: 'regular'
-    mask_pos: 'random'
+    mask_pos: 'bottom'
     mask_height: 128
     mask_width: 128
     vertical_margin: 0
@@ -46,7 +46,7 @@ datasets:
     image_list: 'datasets/celeba_hq/list_val.txt'
     mask_list: 'datasets/mask/list_val.txt'
     mask_type: 'regular'
-    mask_pos: 'random'
+    mask_pos: 'bottom'
     mask_height: 128
     mask_width: 128
     vertical_margin: 0
@@ -61,7 +61,7 @@ img_shape: [3, 256, 256]  # [channel, height, width]
 
 is_train: True
 gpu_ids: []
-pretrained_model_G: 'outputs/celeba-hq/checkpoints/58000_G.pth'
+pretrained_model_G: '/content/drive/MyDrive/AI_Project/project/NoMask/DMFN/outputs/celebahq-regular/checkpoints/latest_G.pth'
 pretrained_model_D: ''
 val_iter: 200
 log_iter: 50

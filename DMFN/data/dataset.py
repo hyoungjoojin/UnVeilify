@@ -54,7 +54,9 @@ class ImageFilelist(data.Dataset):
         # x_incomplete: incomplete image, [-1, 1]
         # returns: [-1, 1] as predicted image
         input_tensor = img_tensor * (1. - mask_tensor)  # [C, H, W]
+        #return {'input': input_tensor, 'bbox': bbox_tensor, 'mask': mask_tensor, 'target': img_tensor, 'paths': impath}
         return {'input': input_tensor, 'bbox': bbox_tensor, 'mask': mask_tensor, 'target': img_tensor, 'paths': impath}
+
 
     def __len__(self):
         return len(self.imlist)

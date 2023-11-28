@@ -32,16 +32,22 @@ def bbox(opt):
 
     """
     fineSize = opt['fineSize']
+    h = opt['mask_height']
+    w = opt['mask_width']
     if opt['mask_pos'] == 'random':  # random mask
         maxt = fineSize - opt['vertical_margin'] - opt['mask_height']  # max top
         maxl = fineSize - opt['horizontal_margin'] - opt['mask_width']  # max left
         t = random.randint(opt['vertical_margin'], maxt)
         l = random.randint(opt['horizontal_margin'], maxl)
+    elif opt['mask_pos'] == 'bottom':
+        # 마스크를 수평 중앙에 위치시키기 위한 left 계산
+        l = (fineSize - w) // 2
+
+        # 마스크를 하단에 위치시키기 위한 top 계산
+        t = fineSize - h - opt['vertical_margin']
     else:  # center mask
         t = (fineSize - opt['vertical_margin'] - opt['mask_height']) // 2
         l = (fineSize - opt['horizontal_margin'] - opt['mask_width']) // 2
-    h = opt['mask_height']
-    w = opt['mask_width']
     return (t, l, h, w)
 
 
