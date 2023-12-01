@@ -1,5 +1,0 @@
-outs:
-- md5: edf9f8cda08c5ceb4b36192fc7f8fbc9
-  size: 36889605
-  hash: md5
-  path: test_point_clouds.h5

@@ -1,0 +1,91 @@
+name: UnVeilify
+deterministic: True
+seed: 10
+
+logger:
+  path: "logs"
+  verbosity: 2
+
+train_dataloader:
+  name: MaskPairImageDataLoader
+  args:
+    masked_image_dir: './data/processed/train/masked_image/'
+    identity_image_dir: './data/processed/train/identity_image/'
+    unmasked_image_dir: './data/processed/train/unmasked_image/'
+    batch_size: 16
+    shuffle: True,
+    num_workers: 2
+    image_resolution: 256
+
+validation_dataloader:
+  name: MaskPairImageDataLoader
+  args:
+    masked_image_dir: './data/processed/val/masked_image/'
+    identity_image_dir: './data/processed/val/identity_image/'
+    unmasked_image_dir: './data/processed/val/unmasked_image/'
+    batch_size: 16
+    shuffle: True,
+    num_workers: 2
+    image_resolution: 256
+
+model:
+  generator:
+    name: MaskRemover 
+    args:
+      output_resolution: 256
+      latent_dim: 512
+      generator_arch: UNetStyleGAN
+  discriminator:
+    name: Discriminator
+
+loss:
+  name: MaskRemoverLoss
+  args:
+    pretrained_irse50: './pretrain/model_ir_se50.pth'
+    lambda_content: 20.0
+    lambda_perceptual: 5.0
+    lambda_identity: 0.5
+    lambda_adversarial: 1.0
+
+optimizer:
+  optim_g:
+    name: Adam
+    args:
+      lr: 0.0002
+      eps: !!float 1e-8
+      betas: [0.5, 0.9]
+
+  optim_d:
+    name: Adam
+    args:
+      lr: 0.0002
+      eps: !!float 1e-8
+      betas: [0.5, 0.9]
+
+lr_scheduler:
+  use_warmup: True
+  warmup_epochs: 5
+
+  name: CosineAnnealingWarmRestarts
+  args:
+    T_0: 50
+    T_mult: 2
+    eta_min: 0
+
+trainer:
+  num_epochs: 100
+  log_step: 5
+
+  checkpoint_dir: "experiments/"
+  save_period: 1
+
+  monitor: "min_val_loss"
+  early_stop: 10
+
+  use_tensorboard: True
+  visualization: True
+
+  validation:
+    do_validation: True
+    validation_steps: 5
+
