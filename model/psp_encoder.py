@@ -82,15 +82,13 @@ class PSPEncoder(nn.Module):
         x = self.input_layer(x)
 
         latents = []
-        modulelist = list(self.body._modules.values())
-        for i, l in enumerate(modulelist):
+        modulelist, skip_connections = list(self.body._modules.values()), []
+
+        for l in modulelist:
             x = l(x)
-            if i == 6:
-                c1 = x
-            elif i == 20:
-                c2 = x
-            elif i == 23:
-                c3 = x
+            skip_connections.append(x)
+
+        c1, c2, c3 = skip_connections[6], skip_connections[20], skip_connections[23]
 
         for j in range(self.coarse_ind):
             latents.append(self.styles[j](c3))
@@ -123,6 +121,7 @@ class GradualStyleBlock(nn.Module):
                 nn.Conv2d(
                     in_channels, out_channels, kernel_size=3, stride=2, padding=1
                 ),
+                nn.BatchNorm2d(num_features=out_channels),
                 nn.LeakyReLU(),
             ]
         modules.append(nn.MaxPool2d(kernel_size=2))
