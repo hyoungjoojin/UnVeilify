@@ -119,15 +119,12 @@ class Trainer:
             unmasked_image = item["unmasked_image"].to(self.device)
             identity_image = item["identity_image"].to(self.device)
 
-            identity_features, generated_unmasked_image = self.generator(
-                masked_image, identity_image
-            )
+            generated_unmasked_image = self.generator(masked_image, identity_image)
 
             loss, loss_dict = self.loss_function(
                 unmasked_image,
                 generated_unmasked_image,
                 identity_image,
-                identity_features,
                 self.discriminator,
                 self.optimizer_d,
             )
@@ -199,7 +196,7 @@ class Trainer:
             unmasked_image = item["unmasked_image"][0].to(self.device).unsqueeze(dim=0)
             identity_image = item["identity_image"][0].to(self.device).unsqueeze(dim=0)
 
-            _, generated_output = self.generator(masked_image, identity_image)
+            generated_output = self.generator(masked_image, identity_image)
 
             masked_image = masked_image.squeeze().detach().cpu()
             unmasked_image = unmasked_image.squeeze().detach().cpu()
