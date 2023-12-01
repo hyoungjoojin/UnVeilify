@@ -2,8 +2,9 @@ import os
 import random
 from typing import Dict, Tuple
 
-import numpy as np
+import torch
 import torchvision.transforms as transforms
+import torchvision.transforms.functional as F
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -15,6 +16,7 @@ class MaskPairImageDataset(Dataset):
         identity_image_dir: str,
         unmasked_image_dir: str,
         image_resolution: int = 512,
+        use_augmentation: bool = True,
     ) -> None:
         """Dataset for image pairs with masked and unmasked face.
 
@@ -56,6 +58,7 @@ class MaskPairImageDataset(Dataset):
         self.identity_image_dir = identity_image_dir
         self.unmasked_image_dir = unmasked_image_dir
         self.image_resolution = image_resolution
+        self.use_augmentation = use_augmentation
 
         self.masked_image_list = os.listdir(masked_image_dir)
         self.identity_image_list = {
@@ -71,7 +74,7 @@ class MaskPairImageDataset(Dataset):
             ]
         )
 
-        self.transform = transforms.Compose(
+        self.to_tensor = transforms.Compose(
             [
                 transforms.ToTensor(),
                 transforms.Normalize(
@@ -83,10 +86,7 @@ class MaskPairImageDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict:
         label = self.masked_image_list[idx]
-        if label[0] == "F":
-            identity = label.split(".")[0]
-        else:
-            identity = label.split("_")[0]
+        identity = label.split("_")[0]
 
         masked_image_path = os.path.join(self.masked_image_dir, label)
         unmasked_image_path = os.path.join(self.unmasked_image_dir, label)
@@ -100,32 +100,39 @@ class MaskPairImageDataset(Dataset):
         unmasked_image = Image.open(unmasked_image_path).convert("RGB")
         identity_image = Image.open(identity_image_path).convert("RGB")
 
-        masked_image = self.transform(masked_image)
-        unmasked_image = self.transform(unmasked_image)
-        identity_image = self.transform(identity_image)
+        masked_image = self.to_tensor(masked_image)
+        unmasked_image = self.to_tensor(unmasked_image)
+        identity_image = self.to_tensor(identity_image)
+
+        if self.use_augmentation:
+            identity_image = self.augmentation(identity_image)
+            masked_image, unmasked_image = self.paired_augmentation(
+                masked_image, unmasked_image
+            )
 
         return {
             "masked_image": masked_image,
             "identity_image": identity_image,
             "unmasked_image": unmasked_image,
+            "identity": identity,
         }
 
     def __len__(self) -> int:
         return len(self.masked_image_list)
 
     def paired_augmentation(
-        self, img1: np.ndarray, img2: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        self, img1: torch.Tensor, img2: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Transform for paired images"""
         if random.random() < 0.5:
-            img1 = np.flip(img1, 0)
-            img2 = np.flip(img2, 0)
+            img1 = F.vflip(img1)
+            img2 = F.vflip(img2)
 
         if random.random() < 0.5:
-            img1 = np.flip(img1, 1)
-            img2 = np.flip(img2, 1)
+            img1 = F.hflip(img1)
+            img2 = F.hflip(img2)
 
-        rot_k = random.choice([0, 1, 2, 3])
-        img1 = np.rot90(img1, k=rot_k, axes=(0, 1))
-        img2 = np.rot90(img2, k=rot_k, axes=(0, 1))
+        rot_k = random.choice([0, 90, 180, 270])
+        img1 = F.rotate(img1, angle=rot_k)
+        img2 = F.rotate(img2, angle=rot_k)
         return img1, img2
