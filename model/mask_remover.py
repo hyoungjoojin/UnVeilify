@@ -35,11 +35,6 @@ class MaskRemover(nn.Module):
         else:
             raise NotImplementedError
 
-        # Parameters
-        self.alpha = nn.Parameter(torch.tensor([0.5]))
-
-        self.initialize_network()
-
     def forward(
         self,
         masked_image: torch.Tensor,
@@ -48,8 +43,3 @@ class MaskRemover(nn.Module):
         identity_featues = self.psp_encoder(identity_image)
         image = self.generator(masked_image, w=identity_featues)
         return image
-
-    def initialize_network(self):
-        for m in self.generator.modules():
-            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d, nn.Linear)):
-                nn.init.kaiming_normal_(m.weight.data, 0.0)
