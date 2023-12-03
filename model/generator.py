@@ -7,6 +7,8 @@ import torch.nn.functional as F
 import torch.utils.data
 from torch import nn
 
+from .utils import UpSample
+
 
 class UNetStyleGAN(nn.Module):
     def __init__(
@@ -50,24 +52,15 @@ class UNetStyleGAN(nn.Module):
                         padding=1,
                     ),
                     nn.BatchNorm2d(num_features=features[-i - 1]),
-                    nn.ReLU(inplace=True),
+                    nn.LeakyReLU(0.2, inplace=True),
                 )
                 for i in range(1, self.num_blocks)
             ]
         )
 
         self.upsample = UpSample()
-        self.final_convolution = nn.Sequential(
-            nn.Sequential(
-                nn.Upsample(scale_factor=2, mode="bilinear"),
-                nn.Conv2d(
-                    in_channels=3,
-                    out_channels=3,
-                    kernel_size=3,
-                    padding=1,
-                ),
-            )
-        )
+
+        self.initialize_network()
 
     def forward(self, masked_image: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
         w = torch.swapaxes(w, 0, 1)
@@ -89,7 +82,12 @@ class UNetStyleGAN(nn.Module):
 
             rgb = self.upsample(rgb) + rgb_new
 
-        return self.final_convolution(rgb)
+        return self.upsample(rgb)
+
+    def initialize_network(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight.data, 0.02)
 
 
 class UNetDownBlock(nn.Module):
@@ -97,8 +95,8 @@ class UNetDownBlock(nn.Module):
         super(UNetDownBlock, self).__init__()
 
         self.convolution = nn.Sequential(
-            nn.BatchNorm2d(num_features=in_channels),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm2d(in_channels),
+            nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -107,7 +105,7 @@ class UNetDownBlock(nn.Module):
                 padding=1,
             ),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(
                 in_channels=out_channels,
                 out_channels=out_channels,
@@ -124,9 +122,11 @@ class UNetDownBlock(nn.Module):
                 stride=2,
                 padding=1,
             ),
-            nn.BatchNorm2d(num_features=out_channels),
         )
-        self.activation = nn.LeakyReLU(0.2, True)
+
+        self.activation = nn.Sequential(
+            nn.BatchNorm2d(num_features=out_channels), nn.LeakyReLU(0.2, True)
+        )
 
     def forward(self, x):
         x = self.convolution(x) + self.residual(x)
@@ -164,7 +164,8 @@ class UNetStyleBlock(nn.Module):
         self.weight_modulated_conv = Conv2dWeightModulate(
             in_features, out_features, kernel_size=3
         )
-        self.scale_image = nn.Parameter(torch.Tensor([0.3]))
+
+        self.weights = nn.Parameter(0.5 * torch.ones((out_features)))
 
         self.convolutional = nn.Sequential(
             nn.Conv2d(
@@ -174,7 +175,7 @@ class UNetStyleBlock(nn.Module):
                 padding=1,
             ),
             nn.BatchNorm2d(num_features=out_features),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(0.2, inplace=True),
         )
 
         self.final_activation = nn.LeakyReLU(0.2, True)
@@ -195,7 +196,10 @@ class UNetStyleBlock(nn.Module):
 
         skip = self.convolutional(skip)
 
-        x = (1 - self.scale_image) * x + self.scale_image * skip
+        x = (
+            self.weights[None, :, None, None] * x
+            + (1 - self.weights[None, :, None, None]) * skip
+        )
 
         return self.final_activation(x)
 
@@ -236,12 +240,6 @@ class ToRGB(nn.Module):
 
 
 class Conv2dWeightModulate(nn.Module):
-    """
-    ### Convolution with Weight Modulation and Demodulation
-
-    This layer scales the convolution weights by the style vector and demodulates by normalizing it.
-    """
-
     def __init__(
         self,
         in_features: int,
@@ -250,13 +248,6 @@ class Conv2dWeightModulate(nn.Module):
         demodulate: float = True,
         eps: float = 1e-8,
     ):
-        """
-        * `in_features` is the number of features in the input feature map
-        * `out_features` is the number of features in the output feature map
-        * `kernel_size` is the size of the convolution kernel
-        * `demodulate` is flag whether to normalize weights by its standard deviation
-        * `eps` is the $\epsilon$ for normalizing
-        """
         super().__init__()
         # Number of output features
         self.out_features = out_features
@@ -313,69 +304,6 @@ class Conv2dWeightModulate(nn.Module):
 
         # Reshape `x` to `[batch_size, out_features, height, width]` and return
         return x.reshape(-1, self.out_features, h, w)
-
-
-class UpSample(nn.Module):
-    """
-    <a id="up_sample"></a>
-
-    ### Up-sample
-
-    The up-sample operation scales the image up by $2 \times$ and [smoothens](#smooth) each feature channel.
-    This is based on the paper
-     [Making Convolutional Networks Shift-Invariant Again](https://arxiv.org/abs/1904.11486).
-    """
-
-    def __init__(self):
-        super().__init__()
-        # Up-sampling layer
-        self.up_sample = nn.Upsample(
-            scale_factor=2, mode="bilinear", align_corners=False
-        )
-        # Smoothing layer
-        self.smooth = Smooth()
-
-    def forward(self, x: torch.Tensor):
-        # Up-sample and smoothen
-        return self.smooth(self.up_sample(x))
-
-
-class Smooth(nn.Module):
-    """
-    <a id="smooth"></a>
-
-    ### Smoothing Layer
-
-    This layer blurs each channel
-    """
-
-    def __init__(self):
-        super().__init__()
-        # Blurring kernel
-        kernel = [[1, 2, 1], [2, 4, 2], [1, 2, 1]]
-        # Convert the kernel to a PyTorch tensor
-        kernel = torch.tensor([[kernel]], dtype=torch.float)
-        # Normalize the kernel
-        kernel /= kernel.sum()
-        # Save kernel as a fixed parameter (no gradient updates)
-        self.kernel = nn.Parameter(kernel, requires_grad=False)
-        # Padding layer
-        self.pad = nn.ReplicationPad2d(1)
-
-    def forward(self, x: torch.Tensor):
-        # Get shape of the input feature map
-        b, c, h, w = x.shape
-        # Reshape for smoothening
-        x = x.view(-1, 1, h, w)
-
-        # Add padding
-        x = self.pad(x)
-
-        # Smoothen (blur) with the kernel
-        x = F.conv2d(x, self.kernel)
-
-        # Reshape and return
-        return x.view(b, c, h, w)
 
 
 class EqualizedLinear(nn.Module):
