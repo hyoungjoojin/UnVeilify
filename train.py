@@ -1,5 +1,7 @@
 from importlib import import_module
 
+from torchvision.transforms.functional import torch
+
 import utils
 from trainer.trainer import Trainer
 
@@ -55,6 +57,20 @@ def main(config):
     lr_scheduler = config.build(
         "lr_scheduler", packages["lr_scheduler_module"], optimizer_g
     )
+
+    if config["lr_scheduler"]["use_warmup"]:
+        warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer_g,
+            lr_lambda=lambda current_step: 1
+            / (10 ** (float(config["lr_scheduler"]["warmup_epochs"] - current_step))),
+        )
+
+        lr_scheduler = torch.optim.lr_scheduler.SequentialLR(
+            optimizer_g,
+            [warmup_scheduler, lr_scheduler],
+            [config["lr_scheduler"]["warmup_epochs"]],
+        )
+
     if lr_scheduler is not None:
         logger.info("LR scheduler build success.")
 

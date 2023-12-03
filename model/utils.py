@@ -1,12 +1,55 @@
 from collections import namedtuple
 
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from torch.nn import (AdaptiveAvgPool2d, BatchNorm2d, Conv2d, MaxPool2d,
                       Module, PReLU, ReLU, Sequential, Sigmoid)
 
-"""
-ArcFace implementation from [TreB1eN](https://github.com/TreB1eN/InsightFace_Pytorch)
-"""
+
+class UpSample(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Up-sampling layer
+        self.up_sample = nn.Upsample(
+            scale_factor=2, mode="bilinear", align_corners=False
+        )
+        # Smoothing layer
+        self.smooth = Smooth()
+
+    def forward(self, x: torch.Tensor):
+        # Up-sample and smoothen
+        return self.smooth(self.up_sample(x))
+
+
+class Smooth(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Blurring kernel
+        kernel = [[1, 2, 1], [2, 4, 2], [1, 2, 1]]
+        # Convert the kernel to a PyTorch tensor
+        kernel = torch.tensor([[kernel]], dtype=torch.float)
+        # Normalize the kernel
+        kernel /= kernel.sum()
+        # Save kernel as a fixed parameter (no gradient updates)
+        self.kernel = nn.Parameter(kernel, requires_grad=False)
+        # Padding layer
+        self.pad = nn.ReplicationPad2d(1)
+
+    def forward(self, x: torch.Tensor):
+        # Get shape of the input feature map
+        b, c, h, w = x.shape
+        # Reshape for smoothening
+        x = x.view(-1, 1, h, w)
+
+        # Add padding
+        x = self.pad(x)
+
+        # Smoothen (blur) with the kernel
+        x = F.conv2d(x, self.kernel)
+
+        # Reshape and return
+        return x.view(b, c, h, w)
 
 
 class Flatten(Module):
