@@ -52,12 +52,6 @@ def main(args):
             masked_image = item["masked_image"].to(device)
             identity_image = item["identity_image"].to(device)
 
-            identity_image = (
-                identity_image.expand(masked_image.shape[0], *identity_image.shape)
-                .to(device)
-                .float()
-            )
-
             label = item["identity"]
 
             output = model(masked_image, identity_image)
