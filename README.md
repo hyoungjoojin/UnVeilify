@@ -5,6 +5,8 @@ We aim to remove facial masks from images using a novel neural network architect
 masks have been, and will be part of many people's lives. *UnVeilify* can remove these face masks
 from any image, given a masked image and an identity image, while preserving the identity features.
 
+Documentation of our project can be seen in our [documentation](/docs/main.pdf).
+
 ## Usage
 
 ### Training
