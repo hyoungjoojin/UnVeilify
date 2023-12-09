@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{8}
+\begin{thebibliography}{24}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -44,12 +44,31 @@
 \newblock
 
 
+\bibitem[Din et~al\mbox{.}(2020)]%
+        {GAN-Mask-Removal}
+\bibfield{author}{\bibinfo{person}{Nizam~Ud Din}, \bibinfo{person}{Kamran Javed}, \bibinfo{person}{Seho Bae}, {and} \bibinfo{person}{Juneho Yi}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{A novel GAN-based network for unmasking of masked face}.
+\newblock \bibinfo{journal}{\emph{IEEE Access}}  \bibinfo{volume}{8} (\bibinfo{year}{2020}), \bibinfo{pages}{44276--44287}.
+\newblock
+
+
 \bibitem[Guan et~al\mbox{.}(2020)]%
         {LPIPS2}
 \bibfield{author}{\bibinfo{person}{Shanyan Guan}, \bibinfo{person}{Ying Tai}, \bibinfo{person}{Bingbing Ni}, \bibinfo{person}{Feida Zhu}, \bibinfo{person}{Feiyue Huang}, {and} \bibinfo{person}{Xiaokang Yang}.} \bibinfo{year}{2020}\natexlab{}.
 \newblock \showarticletitle{Collaborative learning for faster stylegan embedding}.
 \newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2007.01758}} (\bibinfo{year}{2020}).
 \newblock
+
+
+\bibitem[ICT(2021)]%
+        {AI-Hub}
+\bibfield{author}{\bibinfo{person}{Human ICT}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock
+\newblock
+\urldef\tempurl%
+\url{https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=528}
+\showURL{%
+\tempurl}
 
 
 \bibitem[Isola et~al\mbox{.}(2017)]%
@@ -80,6 +99,72 @@
 \newblock
 
 
+\bibitem[Li et~al\mbox{.}(2020)]%
+        {SymmFC}
+\bibfield{author}{\bibinfo{person}{Xiaoming Li}, \bibinfo{person}{Guosheng Hu}, \bibinfo{person}{Jieru Zhu}, \bibinfo{person}{Wangmeng Zuo}, \bibinfo{person}{Meng Wang}, {and} \bibinfo{person}{Lei Zhang}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Learning symmetry consistent deep cnns for face completion}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Image Processing}}  \bibinfo{volume}{29} (\bibinfo{year}{2020}), \bibinfo{pages}{7641--7655}.
+\newblock
+
+
+\bibitem[Liu et~al\mbox{.}(2018)]%
+        {CelebA}
+\bibfield{author}{\bibinfo{person}{Ziwei Liu}, \bibinfo{person}{Ping Luo}, \bibinfo{person}{Xiaogang Wang}, {and} \bibinfo{person}{Xiaoou Tang}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{Large-scale celebfaces attributes (celeba) dataset}.
+\newblock \bibinfo{journal}{\emph{Retrieved August}} \bibinfo{volume}{15}, \bibinfo{number}{2018} (\bibinfo{year}{2018}), \bibinfo{pages}{11}.
+\newblock
+
+
+\bibitem[Lukas and Jan(2021)]%
+        {STRV-ML}
+\bibfield{author}{\bibinfo{person}{Koucky Lukas} {and} \bibinfo{person}{Maly Jan}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \bibinfo{title}{Mask2Face: How we built AI that shows the face beneath the mask}.
+\newblock
+\newblock
+\urldef\tempurl%
+\url{https://www.strv.com/blog/mask2face-how-we-built-ai-that-shows-face-beneath-mask-engineering#ideas-for-additional-improvements}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Luo et~al\mbox{.}(2023)]%
+        {RGLSRI}
+\bibfield{author}{\bibinfo{person}{Wuyang Luo}, \bibinfo{person}{Su Yang}, {and} \bibinfo{person}{Weishan Zhang}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Reference-Guided Large-Scale Face Inpainting with Identity and Texture Control}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Circuits and Systems for Video Technology}} (\bibinfo{year}{2023}).
+\newblock
+
+
+\bibitem[Ma et~al\mbox{.}(2023)]%
+        {SubjectDiffusion}
+\bibfield{author}{\bibinfo{person}{Jian Ma}, \bibinfo{person}{Junhao Liang}, \bibinfo{person}{Chen Chen}, {and} \bibinfo{person}{Haonan Lu}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Subject-diffusion: Open domain personalized text-to-image generation without test-time fine-tuning}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2307.11410}} (\bibinfo{year}{2023}).
+\newblock
+
+
+\bibitem[Ntavelis et~al\mbox{.}(2020)]%
+        {DMFN}
+\bibfield{author}{\bibinfo{person}{Evangelos Ntavelis}, \bibinfo{person}{Andrés Romero}, \bibinfo{person}{Siavash Bigdeli}, \bibinfo{person}{Radu Timofte}, {et~al\mbox{.}}} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{{AIM 2020} Challenge on Image Extreme Inpainting}. In \bibinfo{booktitle}{\emph{European Conference on Computer Vision Workshops}}.
+\newblock
+
+
+\bibitem[Reibman et~al\mbox{.}(2006)]%
+        {BadSSIM2}
+\bibfield{author}{\bibinfo{person}{Amy~R Reibman}, \bibinfo{person}{Robert~M Bell}, {and} \bibinfo{person}{Sharon Gray}.} \bibinfo{year}{2006}\natexlab{}.
+\newblock \showarticletitle{Quality assessment for super-resolution image enhancement}. In \bibinfo{booktitle}{\emph{2006 International Conference on Image Processing}}. IEEE, \bibinfo{pages}{2017--2020}.
+\newblock
+
+
+\bibitem[Reibman and Schaper(2006)]%
+        {BadSSIM1}
+\bibfield{author}{\bibinfo{person}{Amy~R Reibman} {and} \bibinfo{person}{Thilo Schaper}.} \bibinfo{year}{2006}\natexlab{}.
+\newblock \showarticletitle{Subjective performance evaluation of super-resolution image enhancement}.
+\newblock \bibinfo{journal}{\emph{Second Int. Wkshp on Video Proc. and Qual. Metrics (VPQM’06)}} (\bibinfo{year}{2006}).
+\newblock
+
+
 \bibitem[Richardson et~al\mbox{.}(2021)]%
         {PSP}
 \bibfield{author}{\bibinfo{person}{Elad Richardson}, \bibinfo{person}{Yuval Alaluf}, \bibinfo{person}{Or Patashnik}, \bibinfo{person}{Yotam Nitzan}, \bibinfo{person}{Yaniv Azar}, \bibinfo{person}{Stav Shapiro}, {and} \bibinfo{person}{Daniel Cohen-Or}.} \bibinfo{year}{2021}\natexlab{}.
@@ -87,10 +172,56 @@
 \newblock
 
 
+\bibitem[Ronneberger et~al\mbox{.}(2015)]%
+        {UNet}
+\bibfield{author}{\bibinfo{person}{Olaf Ronneberger}, \bibinfo{person}{Philipp Fischer}, {and} \bibinfo{person}{Thomas Brox}.} \bibinfo{year}{2015}\natexlab{}.
+\newblock \showarticletitle{U-net: Convolutional networks for biomedical image segmentation}. In \bibinfo{booktitle}{\emph{Medical Image Computing and Computer-Assisted Intervention--MICCAI 2015: 18th International Conference, Munich , Germany, October 5-9, 2015, Proceedings, Part III 18}}. Springer, \bibinfo{pages}{234--241}.
+\newblock
+
+
+\bibitem[Shi et~al\mbox{.}(2023)]%
+        {InstantBooth}
+\bibfield{author}{\bibinfo{person}{Jing Shi}, \bibinfo{person}{Wei Xiong}, \bibinfo{person}{Zhe Lin}, {and} \bibinfo{person}{Hyun~Joon Jung}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Instantbooth: Personalized text-to-image generation without test-time finetuning}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2304.03411}} (\bibinfo{year}{2023}).
+\newblock
+
+
+\bibitem[Su et~al\mbox{.}(2023)]%
+        {PersonalDiffusion}
+\bibfield{author}{\bibinfo{person}{Yu-Chuan Su}, \bibinfo{person}{Kelvin~CK Chan}, \bibinfo{person}{Yandong Li}, \bibinfo{person}{Yang Zhao}, \bibinfo{person}{Han Zhang}, \bibinfo{person}{Boqing Gong}, \bibinfo{person}{Huisheng Wang}, {and} \bibinfo{person}{Xuhui Jia}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Identity Encoder for Personalized Diffusion}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2304.07429}} (\bibinfo{year}{2023}).
+\newblock
+
+
 \bibitem[Zhang et~al\mbox{.}(2018)]%
         {LPIPS}
 \bibfield{author}{\bibinfo{person}{Richard Zhang}, \bibinfo{person}{Phillip Isola}, \bibinfo{person}{Alexei~A Efros}, \bibinfo{person}{Eli Shechtman}, {and} \bibinfo{person}{Oliver Wang}.} \bibinfo{year}{2018}\natexlab{}.
 \newblock \showarticletitle{The unreasonable effectiveness of deep features as a perceptual metric}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE conference on computer vision and pattern recognition}}. \bibinfo{pages}{586--595}.
+\newblock
+
+
+\bibitem[Zhao et~al\mbox{.}(2016)]%
+        {Image-Restoration-Loss}
+\bibfield{author}{\bibinfo{person}{Hang Zhao}, \bibinfo{person}{Orazio Gallo}, \bibinfo{person}{Iuri Frosio}, {and} \bibinfo{person}{Jan Kautz}.} \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{Loss functions for image restoration with neural networks}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on computational imaging}} \bibinfo{volume}{3}, \bibinfo{number}{1} (\bibinfo{year}{2016}), \bibinfo{pages}{47--57}.
+\newblock
+
+
+\bibitem[Zhao et~al\mbox{.}(2018)]%
+        {IPFC}
+\bibfield{author}{\bibinfo{person}{Yajie Zhao}, \bibinfo{person}{Weikai Chen}, \bibinfo{person}{Jun Xing}, \bibinfo{person}{Xiaoming Li}, \bibinfo{person}{Zach Bessinger}, \bibinfo{person}{Fuchang Liu}, \bibinfo{person}{Wangmeng Zuo}, {and} \bibinfo{person}{Ruigang Yang}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{Identity preserving face completion for large ocular region occlusion}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:1807.08772}} (\bibinfo{year}{2018}).
+\newblock
+
+
+\bibitem[Zhu et~al\mbox{.}(2017)]%
+        {CycleGAN}
+\bibfield{author}{\bibinfo{person}{Jun-Yan Zhu}, \bibinfo{person}{Taesung Park}, \bibinfo{person}{Phillip Isola}, {and} \bibinfo{person}{Alexei~A Efros}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Unpaired image-to-image translation using cycle-consistent adversarial networks}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE international conference on computer vision}}. \bibinfo{pages}{2223--2232}.
 \newblock
 
 
