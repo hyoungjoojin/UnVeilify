@@ -7,6 +7,7 @@ from any image, given a masked image and an identity image, while preserving the
 <p align='center'>
 <img src="docs/images/model-architecture.png" width="800px"/>
 </p>
+
 Documentation of our project can be seen in our [documentation](/docs/main.pdf).
 
 ## Usage
